@@ -22,6 +22,6 @@ class PriceRequest(BaseModel):
 async def get_prices(request: PriceRequest):
     try:
         result = await get_sorted_prices(request.country, request.product)
-        return {"sorted_prices": result}
+        return {"result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
