@@ -1,0 +1,17 @@
+from fastapi import FastAPI, HTTPException, Request
+from pydantic import BaseModel
+from core import get_sorted_prices
+
+app = FastAPI()
+
+class PriceRequest(BaseModel):
+    country: str
+    product: str
+
+@app.post("/get-prices")
+async def get_prices(request: PriceRequest):
+    try:
+        result = await get_sorted_prices(request.country, request.product)
+        return {"sorted_prices": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
