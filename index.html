@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Price Finder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2e7d32;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    select, input, button {
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 100%;
+    }
+    button {
+      background-color: #2e7d32;
+      color: white;
+      cursor: pointer;
+      border: none;
+      font-size: 18px;
+    }
+    button:hover {
+      background-color: #1b5e20;
+    }
+    .results {
+      margin-top: 30px;
+    }
+    .result-item {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #fafbfc;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .result-item h4 {
+      margin-bottom: 8px;
+      color: #1976d2;
+    }
+    .result-item .price {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    .result-item .product-name {
+      margin: 8px 0;
+      color: #555;
+    }
+    .result-item a {
+      color: #1976d2;
+      text-decoration: none;
+    }
+    .result-item a:hover {
+      text-decoration: underline;
+    }
+    .loading {
+      text-align: center;
+      font-size: 18px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1> Global Price Finder</h1>
+    <form id="searchForm">
+      <div>
+        <label for="country">Select Country</label>
+        <select id="country" required>
+          <!-- Full list of countries -->
+          <option value="India">India</option>
+          <option value="United States">United States</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Canada">Canada</option>
+          <option value="Australia">Australia</option>
+          <option value="Germany">Germany</option>
+          <option value="France">France</option>
+          <option value="Italy">Italy</option>
+          <option value="Spain">Spain</option>
+          <option value="Brazil">Brazil</option>
+          <option value="Mexico">Mexico</option>
+          <option value="Japan">Japan</option>
+          <option value="China">China</option>
+          <option value="Singapore">Singapore</option>
+          <option value="South Africa">South Africa</option>
+          <option value="UAE">UAE</option>
+          <option value="Saudi Arabia">Saudi Arabia</option>
+          <option value="Netherlands">Netherlands</option>
+          <option value="Sweden">Sweden</option>
+          <option value="Switzerland">Switzerland</option>
+          <option value="Turkey">Turkey</option>
+          <option value="Russia">Russia</option>
+          <option value="Indonesia">Indonesia</option>
+          <option value="Malaysia">Malaysia</option>
+          <option value="Thailand">Thailand</option>
+          <option value="Vietnam">Vietnam</option>
+          <option value="Philippines">Philippines</option>
+          <option value="Argentina">Argentina</option>
+          <option value="Chile">Chile</option>
+          <option value="Colombia">Colombia</option>
+          <option value="Egypt">Egypt</option>
+          <option value="Nigeria">Nigeria</option>
+          <option value="Kenya">Kenya</option>
+          <option value="South Korea">South Korea</option>
+          <option value="New Zealand">New Zealand</option>
+          <option value="Pakistan">Pakistan</option>
+          <option value="Bangladesh">Bangladesh</option>
+          <option value="Poland">Poland</option>
+          <option value="Portugal">Portugal</option>
+          <option value="Greece">Greece</option>
+          <option value="Norway">Norway</option>
+          <option value="Denmark">Denmark</option>
+          <option value="Finland">Finland</option>
+          <option value="Ireland">Ireland</option>
+          <option value="Belgium">Belgium</option>
+          <option value="Austria">Austria</option>
+        </select>
+      </div>
+      <div>
+        <label for="product">Enter Product Name</label>
+        <input type="text" id="product" placeholder="e.g., iPhone 16 Pro, 128GB" required>
+      </div>
+      <button type="submit">🔍 Search</button>
+    </form>
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://bharatx-task-bl9u.onrender.com/get-prices";
+
+    document.getElementById("searchForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      // Clear previous results
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      // Get form values
+      const country = document.getElementById("country").value;
+      const product = document.getElementById("product").value;
+
+      // Show loading message
+      const loadingMessage = document.createElement("p");
+      loadingMessage.className = "loading";
+      loadingMessage.textContent = "Fetching prices...";
+      resultsDiv.appendChild(loadingMessage);
+
+      try {
+        // Make API request
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ country, product }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch prices");
+        }
+
+        const data = await response.json();
+        const items = data.sorted_prices || [];
+
+        // Clear loading message
+        resultsDiv.innerHTML = "";
+
+        if (items.length === 0) {
+          const noResultsMessage = document.createElement("p");
+          noResultsMessage.textContent = "No prices found. Try a different product or country.";
+          resultsDiv.appendChild(noResultsMessage);
+          return;
+        }
+
+        // Display results
+        items.forEach((item) => {
+          const resultItem = document.createElement("div");
+          resultItem.className = "result-item";
+
+          resultItem.innerHTML = `
+            <h4>${item.website || "Unknown"}</h4>
+            <div class="price">${item.currency || "₹"}${item.price}</div>
+            <div class="product-name">${item.productName || item.title || ""}</div>
+            <a href="${item.link || "#"}" target="_blank">View Product</a>
+            <div style="font-size:0.8em; color:#888; margin-top:8px;">Method: ${item.method || ""}</div>
+          `;
+
+          resultsDiv.appendChild(resultItem);
+        });
+      } catch (error) {
+        resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
